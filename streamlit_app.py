@@ -724,6 +724,11 @@ with tab3:
             """, unsafe_allow_html=True)
 
 
+            new_filename = st.text_input(
+                "Enter file name (optional): ",
+                value=st.session_state.filename_input
+            )
+
             submitted = st.form_submit_button("Generate File")
 
             if submitted:
