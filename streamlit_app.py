@@ -708,17 +708,33 @@ with tab3:
         with st.form("filename_form"):
             st.markdown("""
             <style>
-            /* Force white font in the input box */
-            input[type="text"] {
+            /* Override both normal and focused states */
+            form[data-testid="stForm"] input[type="text"] {
+                background-color: rgba(255, 255, 255, 0.05) !important;
                 color: white !important;
+                border: 1px solid #ccc !important;
+                padding: 0.5em !important;
+                box-shadow: none !important;
             }
 
-            /* Optional: white placeholder */
-            input[type="text"]::placeholder {
+            form[data-testid="stForm"] input[type="text"]:focus {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                color: white !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+            }
+
+            /* Placeholder text color */
+            form[data-testid="stForm"] input[type="text"]::placeholder {
                 color: #dddddd !important;
             }
             </style>
             """, unsafe_allow_html=True)
+
+            new_filename = st.text_input(
+                "Enter file name (optional): ",
+                value=st.session_state.filename_input
+            )
 
             submitted = st.form_submit_button("Generate File")
 
