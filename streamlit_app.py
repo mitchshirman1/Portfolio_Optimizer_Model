@@ -273,15 +273,21 @@ with tab1:
             actual_investment = (shares * latest_prices).sum()
             cash_remaining = total_investment - actual_investment
 
-            allocation_df = pd.DataFrame({
-                'Ticker': tickers,
-                'Sector': [sector_map[t] for t in tickers],
-                'Weight (%)': (opt_weights * 100).round(2),
-                'Latest Price': latest_prices.round(2),
-                'Allocated ($)': allocations.round(2),
-                'Shares to Buy': shares.astype(int),
-                'Total Value ($)': (shares * latest_prices).round(2)
-            })
+            portfolio_data = []
+
+            for i, ticker in enumerate(tickers):
+                portfolio_data.append({
+                    'Ticker': ticker,
+                    'Sector': sector_map[ticker],
+                    'Weight (%)': round(opt_weights[i] * 100, 2),
+                    'Latest Price': round(latest_prices[i], 2),
+                    'Allocated ($)': round(allocations[i], 2),
+                    'Shares to Buy': int(shares[i]),
+                    'Total Value ($)': round(shares[i] * latest_prices[i], 2)
+                })
+
+allocation_df = pd.DataFrame(portfolio_data)
+
 
             st.subheader("Optimized Portfolio Breakdown")
             st.dataframe(allocation_df)
