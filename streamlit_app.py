@@ -708,21 +708,28 @@ with tab3:
         with st.form("filename_form"):
             st.markdown("""
             <style>
-            /* More robust target for just this specific input box */
+            /* Override both normal and focused states */
             form[data-testid="stForm"] input[type="text"] {
                 background-color: rgba(255, 255, 255, 0.05) !important;
                 color: white !important;
                 border: 1px solid #ccc !important;
                 padding: 0.5em !important;
+                box-shadow: none !important;
             }
 
-            /* Placeholder text */
+            form[data-testid="stForm"] input[type="text"]:focus {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                color: white !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+            }
+
+            /* Placeholder text color */
             form[data-testid="stForm"] input[type="text"]::placeholder {
                 color: #dddddd !important;
             }
             </style>
             """, unsafe_allow_html=True)
-
 
             new_filename = st.text_input(
                 "Enter file name (optional): ",
