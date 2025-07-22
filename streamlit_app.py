@@ -85,6 +85,21 @@ button[kind="secondary"]:hover {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+input[type="text"] {
+    color: white !important;
+    background-color: #42A5F5 !important;  /* optional: matches your theme */
+    border: 1px solid #ccc;
+}
+
+input[type="text"]::placeholder {
+    color: #eeeeee !important;  /* optional: placeholder text color */
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 st.set_page_config(page_title="Portfolio Optimization Dashboard", layout="wide")
 tab1, tab2, tab3 = st.tabs(["Inputs", "Charts", "Export"])
 
