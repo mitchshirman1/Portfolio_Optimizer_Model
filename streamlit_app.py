@@ -708,22 +708,21 @@ with tab3:
         with st.form("filename_form"):
             st.markdown("""
             <style>
-            div[data-testid="stTextInput"] > div > input {
+            /* More robust target for just this specific input box */
+            form[data-testid="stForm"] input[type="text"] {
                 background-color: rgba(255, 255, 255, 0.05) !important;
                 color: white !important;
-                border: 1px solid #ccc;
-                padding: 0.5em;
+                border: 1px solid #ccc !important;
+                padding: 0.5em !important;
             }
-            div[data-testid="stTextInput"] > div > input::placeholder {
+
+            /* Placeholder text */
+            form[data-testid="stForm"] input[type="text"]::placeholder {
                 color: #dddddd !important;
             }
             </style>
             """, unsafe_allow_html=True)
 
-            new_filename = st.text_input(
-                "Enter file name (optional): ",
-                value=st.session_state.filename_input
-            )
 
             submitted = st.form_submit_button("Generate File")
 
