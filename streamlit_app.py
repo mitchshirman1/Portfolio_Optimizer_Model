@@ -59,6 +59,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+/* Make disabled button more visible */
+button[disabled] {
+    background-color: #ffffff33 !important;
+    color: #eeeeee !important;
+    border: 1px solid #cccccc !important;
+    opacity: 1 !important;
+}
+
+/* Style enabled Reset button for better contrast */
+button[kind="secondary"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #999 !important;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #f0f0f0 !important;
+    color: #000 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Portfolio Optimization Dashboard", layout="wide")
 tab1, tab2, tab3 = st.tabs(["Inputs", "Charts", "Export"])
 
@@ -72,20 +98,113 @@ if 'opt_weights' not in st.session_state:
     st.session_state.end_str = ''
     st.session_state.portfolio_final_value = 0
 
+if "optimization_ran" not in st.session_state:
+    st.session_state.optimization_ran = False
+if "do_reset" not in st.session_state:
+    st.session_state.do_reset = False
+if "show_reset_message" not in st.session_state:
+    st.session_state.show_reset_message = False
+if "show_success_toast" not in st.session_state:
+    st.session_state.show_success_toast = False
+if "show_reset_toast" not in st.session_state:
+    st.session_state.show_reset_toast = False
+
+if st.session_state.do_reset:
+    st.session_state["tickers_input"] = ""
+    st.session_state["investment_amount"] = 1000.0
+    st.session_state["risk_free_rate"] = 2.0
+    st.session_state["end_date"] = datetime.today()
+    st.session_state["optimization_ran"] = False
+    st.session_state["do_reset"] = False
+
+    # Also clear session variables used in the charts
+    for key in [
+        "opt_weights", "returns", "tickers", "allocation_df", "performance_summary",
+        "total_investment", "start_date_str", "end_date_str"
+    ]:
+        if key in st.session_state:
+            del st.session_state[key]
+
+if st.session_state.show_reset_message:
+    st.session_state.show_reset_message = False
+
 with tab1:
     st.title("Portfolio Optimization Dashboard (Data Input)")
     st.sidebar.header("User Inputs")
 
-    tickers_input = st.sidebar.text_input("Enter stock tickers separated by commas: ")
+    tickers_input = st.sidebar.text_input("Enter stock tickers separated by commas: ", key="tickers_input")
     tickers = [t.strip().upper() for t in tickers_input.split(",") if t.strip() != ""]
 
-    end_date = st.sidebar.date_input("Select end date", datetime.today())
+    default_end_date = st.session_state.get("end_date", datetime.today())
+    end_date = st.sidebar.date_input("Select end date", value=default_end_date, key="end_date")
     start_date = end_date.replace(year=end_date.year - 3)
 
-    total_investment = st.sidebar.number_input("Total investment amount ($)", min_value=1000.0, value=1000.0)
-    risk_free_rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=2.0) / 100
+    total_investment = st.sidebar.number_input("Total investment amount ($)", min_value=100.00, value=st.session_state.get("investment_amount", 1000.0), key="investment_amount")
+    risk_free_rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=st.session_state.get("risk_free_rate", 2.0), key="risk_free_rate") / 100
 
-    if st.button("Run Portfolio Optimization") and tickers:
+    with st.sidebar:
+        st.markdown("---")  # optional separator
+        st.markdown("### Reset Options")
+
+        reset_clicked = st.button("Reset Cache & Inputs")
+
+        if reset_clicked:
+            if st.session_state.get("optimization_ran", False):
+                st.session_state["do_reset"] = True
+                st.session_state["show_reset_message"] = True
+                st.session_state["show_success_toast"] = False
+                st.session_state["show_reset_toast"] = True
+                st.rerun()
+            else:
+                st.markdown(
+                    """
+                    <style>
+                    .fade-box {
+                        animation: fadeIn 0.5s ease-in;
+                        background-color: #FFD2D2;
+                        padding: 10px 15px;
+                        border-radius: 8px;
+                        border: 1px solid #FF8888;
+                        color: #990000;
+                        font-weight: 500;
+                        position: relative;
+                    }
+
+                    @keyframes fadeIn {
+                        from {opacity: 0;}
+                        to {opacity: 1;}
+                    }
+
+                    .fade-box.fade-out {
+                        animation: fadeOut 1s ease-in forwards;
+                    }
+
+                    @keyframes fadeOut {
+                        from {opacity: 1;}
+                        to {opacity: 0;}
+                    }
+                    </style>
+
+                    <script>
+                    setTimeout(() => {
+                        const box = window.parent.document.querySelectorAll('.fade-box');
+                        box.forEach(el => el.classList.add('fade-out'));
+                    }, 3000);
+                    </script>
+
+                    <div class="fade-box">
+                        Run optimization first before resetting inputs.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+    if st.button("Run Portfolio Optimization"):
+        st.session_state["optimization_ran"] = True
+        st.session_state["show_success_toast"] = True
+        if not tickers:
+            st.warning("Please enter valid")
+            st.stop()
         with st.spinner("Fetching data and optimizing portfolio..."):
             sector_map = {}
             for ticker in tickers:
@@ -187,13 +306,105 @@ with tab1:
                 "Actual Invested": f"${actual_investment:.2f}",
                 "Unused Cash": f"${cash_remaining:.2f}",
             }
+    if st.session_state.show_success_toast and not st.session_state.get("do_reset", False):
+        st.markdown(
+            """
+            <style>
+            #toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+            }
+
+            .toast {
+                animation: fadeIn 0.5s ease-in, fadeOut 1s ease-out 3s forwards;
+                background-color: #D4EDDA;
+                color: #155724;
+                border: 1px solid #A0D5AC;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 500;
+                box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+                margin-bottom: 10px;
+                font-size: 15px;
+                max-width: 300px;
+            }
+
+            @keyframes fadeIn {
+                from {opacity: 0; transform: translateY(-10px);}
+                to {opacity: 1; transform: translateY(0);}
+            }
+
+            @keyframes fadeOut {
+                from {opacity: 1;}
+                to {opacity: 0;}
+            }
+            </style>
+
+            <div id="toast-container">
+                <div class="toast"> Portfolio optimization ran successfully.</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.session_state["show_success_toast"] = False
+    
+    if st.session_state.get("show_reset_toast", False):
+        st.markdown(
+            """
+            <style>
+            .toast-blue {
+                animation: fadeIn 0.5s ease-in;
+                background-color: #D0E8FF;
+                padding: 10px 15px;
+                border-radius: 8px;
+                border: 1px solid #3399FF;
+                color: #003366;
+                font-weight: 500;
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 9999;
+            }
+
+            @keyframes fadeIn {
+                from {opacity: 0; transform: translateY(10px);}
+                to {opacity: 1; transform: translateY(0);}
+            }
+
+            @keyframes fadeOut {
+                from {opacity: 1;}
+                to {opacity: 0;}
+            }
+
+            .toast-blue.fade-out {
+                animation: fadeOut 1s ease-in forwards;
+            }
+            </style>
+
+            <script>
+            setTimeout(() => {
+                const box = window.parent.document.querySelectorAll('.toast-blue');
+                box.forEach(el => el.classList.add('fade-out'));
+            }, 3000);
+            </script>
+
+            <div class="toast-blue">Inputs have been reset.</div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.session_state.show_reset_toast = False
+
 
 with tab2:
-    if st.session_state.opt_weights is None:
+    st.title("Portfolio Charts")
+
+    if st.session_state.get("opt_weights") is None:
         st.warning("Please run the optimization on the Inputs tab first.")
     else:
-        st.header("Portfolio Charts")
-        chart_category = st.radio("Choose Chart Group", ["Allocation Charts", "Performance Charts"], horizontal=True)
+        st.subheader("Choose Chart Group")
+        chart_category = st.radio("", ["Allocation Charts", "Performance Charts"], horizontal=True)
 
         tickers = st.session_state.tickers
         opt_weights = st.session_state.opt_weights
@@ -466,7 +677,7 @@ with tab2:
             
 with tab3:
     import io
-    st.header("Export Optimization Portfolio")
+    st.title("Export Optimization Portfolio")
 
     if (
         "opt_weights" in st.session_state 
