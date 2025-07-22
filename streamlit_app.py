@@ -228,8 +228,8 @@ with tab1:
                 'Unknown': 0.15,
             }
 
-            st.session_state["start_str"] = start_date.strftime("%Y-%m-%d")
-            st.session_state["end_str"] = end_date.strftime("%Y-%m-%d")
+            start_str = start_date.strftime("%Y-%m-%d")
+            end_str = end_date.strftime("%Y-%m-%d")
             price_data = yf.download(tickers, start=start_str, end=end_str, auto_adjust=True, progress=False)['Close']
             price_data.dropna(inplace=True)
             returns = price_data.pct_change().dropna()
