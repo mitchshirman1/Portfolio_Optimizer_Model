@@ -286,7 +286,7 @@ with tab1:
                     'Total Value ($)': round(shares[i] * latest_prices[i], 2)
                 })
 
-allocation_df = pd.DataFrame(portfolio_data)
+            allocation_df = pd.DataFrame(portfolio_data)
 
 
             st.subheader("Optimized Portfolio Breakdown")
