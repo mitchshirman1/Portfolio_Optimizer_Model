@@ -275,19 +275,18 @@ with tab1:
 
             portfolio_data = []
 
-            for i, ticker in enumerate(tickers):
+            for ticker, weight, price, allocation, share in zip(tickers, opt_weights, latest_prices, allocations, shares):
                 portfolio_data.append({
                     'Ticker': ticker,
                     'Sector': sector_map[ticker],
-                    'Weight (%)': round(opt_weights[i] * 100, 2),
-                    'Latest Price': round(latest_prices[i], 2),
-                    'Allocated ($)': round(allocations[i], 2),
-                    'Shares to Buy': int(shares[i]),
-                    'Total Value ($)': round(shares[i] * latest_prices[i], 2)
+                    'Weight (%)': round(weight * 100, 2),
+                    'Latest Price': round(price, 2),
+                    'Allocated ($)': round(allocation, 2),
+                    'Shares to Buy': int(share),
+                    'Total Value ($)': round(share * price, 2)
                 })
 
             allocation_df = pd.DataFrame(portfolio_data)
-
 
             st.subheader("Optimized Portfolio Breakdown")
             st.dataframe(allocation_df)
