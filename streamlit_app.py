@@ -706,10 +706,25 @@ with tab3:
             st.session_state.file_ready = False
 
         with st.form("filename_form"):
+            st.markdown("""
+            <style>
+            div[data-testid="stTextInput"] > div > input {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                color: white !important;
+                border: 1px solid #ccc;
+                padding: 0.5em;
+            }
+            div[data-testid="stTextInput"] > div > input::placeholder {
+                color: #dddddd !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
             new_filename = st.text_input(
                 "Enter file name (optional): ",
                 value=st.session_state.filename_input
             )
+
             submitted = st.form_submit_button("Generate File")
 
             if submitted:
