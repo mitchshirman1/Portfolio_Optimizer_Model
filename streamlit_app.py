@@ -138,8 +138,7 @@ with tab1:
     if "end_date" not in st.session_state:
         st.session_state["end_date"] = datetime.today()
 
-    st.session_state["end_date"] = st.sidebar.date_input("Select end date", key="end_date")
-    end_date = st.session_state["end_date"]
+    end_date = st.sidebar.date_input("Select end date", value=st.session_state["end_date"], key="end_date")
     start_date = end_date.replace(year=end_date.year - 3)
 
     total_investment = st.sidebar.number_input("Total investment amount ($)", min_value=100.00, value=st.session_state.get("investment_amount", 1000.0), key="investment_amount")
