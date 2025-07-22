@@ -135,8 +135,9 @@ with tab1:
     tickers_input = st.sidebar.text_input("Enter stock tickers separated by commas: ", key="tickers_input")
     tickers = [t.strip().upper() for t in tickers_input.split(",") if t.strip() != ""]
 
-    default_end_date = st.session_state.get("end_date", datetime.today())
-    end_date = st.sidebar.date_input("Select end date", value=default_end_date, key="end_date")
+    if "end_date" not in st.session_state:
+        st.session_state["end_date"] = datetime.today()
+    end_date = st.sidebar.date_input("Select end date", key="end_date")
     start_date = end_date.replace(year=end_date.year - 3)
 
     total_investment = st.sidebar.number_input("Total investment amount ($)", min_value=100.00, value=st.session_state.get("investment_amount", 1000.0), key="investment_amount")
