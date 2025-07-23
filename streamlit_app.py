@@ -219,7 +219,7 @@ with tab1:
                     sector_map[ticker] = 'Unknown'
 
             st.subheader("Sector Mapping")
-            df = pd.DataFrame.from_dict(sector_map, orient='index', columns=['Sector']))
+            df = pd.DataFrame.from_dict(sector_map, orient='index', columns=['Sector'])
             df.index.name = "Ticker"
             st.write(df)
 
