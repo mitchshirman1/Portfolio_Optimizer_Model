@@ -130,7 +130,7 @@ if st.session_state.show_reset_message:
     st.session_state.show_reset_message = False
 
 with tab1:
-    st.title("Portfolio Optimization Dashboard (Data Input)")
+    st.title("Portfolio Optimization Dashboard")
     st.sidebar.header("User Inputs")
 
     tickers_input = st.sidebar.text_input("Enter stock tickers separated by commas: ", key="tickers_input")
