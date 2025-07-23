@@ -235,10 +235,15 @@ with tab1:
             for ticker in valid_tickers:
                 try:
                     stock = yf.Ticker(ticker)
-                    info = stock.info
-                    sector_map[ticker] = info.get('sector', 'Unknown')
-                except:
+                    info = stock.get_info()
+                    sector = info.get('sector')
+                    if sector:
+                        sector_map[ticker] = sector
+                    else:
+                        sector_map[ticker] = 'Unknown'
+                except Exception as e:
                     sector_map[ticker] = 'Unknown'
+                    st.warning(f"Failed to fetch sector for {ticker}: {e}")
 
             st.subheader("Sector Mapping")
             df = pd.DataFrame.from_dict(sector_map, orient='index', columns=['Sector'])
