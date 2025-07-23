@@ -136,6 +136,26 @@ with tab1:
     tickers_input = st.sidebar.text_input("Enter stock tickers separated by commas: ", key="tickers_input")
     tickers = [t.strip().upper() for t in tickers_input.split(",") if t.strip() != ""]
 
+    if tickers:
+        try:
+            price_data = yf.download(tickers, period="1mo", auto_adjust=True, progress=False)['Close']
+
+            # Check which tickers returned no data
+            missing = [t for t in tickers if t not in price_data.columns]
+            if missing:
+                st.warning(f"These tickers are invalid or have no data: {', '.join(missing)}")
+
+            if price_data.empty or len(price_data.columns) == 0:
+                st.error("No valid data retrieved. Please check your tickers.")
+            else:
+                st.success("Tickers loaded successfully.")
+                # You can proceed with your portfolio logic here
+
+        except Exception as e:
+            st.error(f"An error occurred while fetching data: {e}")
+    else:
+        st.info("Please enter at least one ticker.")
+
     if "end_date" not in st.session_state:
         st.session_state["end_date"] = datetime.today()
 
