@@ -233,6 +233,7 @@ with tab1:
             end_str = end_date.strftime("%Y-%m-%d")
             price_data = yf.download(tickers, start=start_str, end=end_str, auto_adjust=True, progress=False)['Close']
             price_data.dropna(inplace=True)
+            price_data = price_data[tickers]
             returns = price_data.pct_change().dropna()
 
             mean_returns = returns.mean() * 252
@@ -273,23 +274,18 @@ with tab1:
             actual_investment = (shares * latest_prices).sum()
             cash_remaining = total_investment - actual_investment
 
-            portfolio_data = []
-
-            for ticker, weight, price, allocation, share in zip(tickers, opt_weights, latest_prices, allocations, shares):
-                portfolio_data.append({
-                    'Ticker': ticker,
-                    'Sector': sector_map[ticker],
-                    'Weight (%)': round(weight * 100, 2),
-                    'Latest Price': round(price, 2),
-                    'Allocated ($)': round(allocation, 2),
-                    'Shares to Buy': int(share),
-                    'Total Value ($)': round(share * price, 2)
-                })
-
-            allocation_df = pd.DataFrame(portfolio_data)
+            allocation_df = pd.DataFrame({
+                'Ticker': tickers,
+                'Sector': [sector_map[t] for t in tickers],
+                'Weight (%)': (opt_weights * 100).round(2),
+                'Latest Price': latest_prices.round(2),
+                'Allocated ($)': allocations.round(2),
+                'Shares to Buy': shares.astype(int),
+                'Total Value ($)': (shares * latest_prices).round(2)
+            })
 
             st.subheader("Optimized Portfolio Breakdown")
-            st.dataframe(allocation_df)
+            st.dataframe(allocation_df.set_index('Ticker'))
 
             st.subheader("Portfolio Performance Summary")
             st.write(f"**Expected Annual Return:** {opt_return * 100:.2f}%")
