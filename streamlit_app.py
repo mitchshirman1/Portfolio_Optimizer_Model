@@ -142,12 +142,14 @@ with tab1:
 
             # Check which tickers returned no data
             missing = [t for t in tickers if t not in price_data.columns]
+            valid_tickers = []
             if missing:
                 st.warning(f"These tickers are invalid or have no data: {', '.join(missing)}")
 
             if price_data.empty or len(price_data.columns) == 0:
                 st.error("No valid data retrieved. Please check your tickers.")
             else:
+                valid_tickers = list(price_data.columns)
                 st.success("Tickers loaded successfully.")
                 # You can proceed with your portfolio logic here
 
@@ -225,12 +227,12 @@ with tab1:
     if st.button("Run Portfolio Optimization"):
         st.session_state["optimization_ran"] = True
         st.session_state["show_success_toast"] = True
-        if not tickers:
+        if not valid_tickers:
             st.warning("Please enter valid")
             st.stop()
         with st.spinner("Fetching data and optimizing portfolio..."):
             sector_map = {}
-            for ticker in tickers:
+            for ticker in valid_tickers:
                 try:
                     stock = yf.Ticker(ticker)
                     info = stock.info
