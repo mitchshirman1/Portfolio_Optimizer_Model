@@ -785,4 +785,4 @@ with tab3:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
     else:
-        st.info("Please run the optimization first from the Inputs tab.")
+        st.info("Please run the optimization on the Inputs tab first.")
