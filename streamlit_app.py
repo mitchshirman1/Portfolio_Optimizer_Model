@@ -228,7 +228,7 @@ with tab1:
         st.session_state["optimization_ran"] = True
         st.session_state["show_success_toast"] = True
         if not valid_tickers:
-            st.warning("Please enter a valid ticker.")
+            st.warning("Please enter a valid ticker/s.")
             st.stop()
         with st.spinner("Fetching data and optimizing portfolio..."):
             sector_map = {}
